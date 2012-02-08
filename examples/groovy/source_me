@@ -1,0 +1,3 @@
+PATH=$PATH:/home/ubuntu/groovy-1.8.5/bin
+export PATH;
+
