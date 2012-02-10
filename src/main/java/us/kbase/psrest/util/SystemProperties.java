@@ -10,6 +10,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 
 import java.util.Properties;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -44,7 +45,8 @@ public class SystemProperties {
         } else if (System.getProperty(SYS_PROP) != null) {
             file = System.getProperty(SYS_PROP);
         } else {
-            file = "/etc/sys.properties";
+            //file = "/etc/sys.properties";
+            file = System.getProperty("user.dir") + "/conf/sys.properties";
         }
 
         Logger.getLogger(SystemProperties.class.getName()).log(Level.INFO,
@@ -92,5 +94,9 @@ public class SystemProperties {
      */
     public String get(String key) {
         return prop.getProperty(key);
+    }
+    
+    public Set<String> propertySet(){
+        return this.prop.stringPropertyNames();
     }
 }

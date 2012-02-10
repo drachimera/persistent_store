@@ -30,5 +30,6 @@ public class ExampleResource {
         // Return some cliched textual content        
         return "PSREST Server Up and Functioning\n";
     }
+    
 }
     
