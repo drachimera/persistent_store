@@ -5,6 +5,8 @@
 
 CP=$( echo `dirname $0`/../target/psrest-*-standalone/lib/*.jar . | sed 's/ /:/g')
 CP=$CP:$( echo `dirname $0`/../target/psrest-*-standalone/ext/*.jar . | sed 's/ /:/g')
+CP=$CP:$( echo `dirname $0`/target/psrest-*-standalone/lib/*.jar . | sed 's/ /:/g')
+CP=$CP:$( echo `dirname $0`/target/psrest-*-standalone/ext/*.jar . | sed 's/ /:/g')
 echo $CP
 
 # Find Java
