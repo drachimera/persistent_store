@@ -1,0 +1,6 @@
+
+first, have to change the port and other stuff on the mongod using --configsvr
+nohup /mnt/mongo/mongodb-linux-x86_64-2.0.2/bin/mongod --configsvr --dbpath /mnt/mongo &
+
+then need to start it up with:
+nohup /mnt/mongo/mongodb-linux-x86_64-2.0.2/bin/mongos --configdb 140.221.92.72:27019,140.221.92.71:27019,140.221.92.70:27019 > mongos.log &

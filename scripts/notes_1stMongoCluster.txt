@@ -1,0 +1,4 @@
+I am following the guide here:
+http://www.mongodb.org/display/DOCS/Simple+Initial+Sharding+Architecture
+
+
