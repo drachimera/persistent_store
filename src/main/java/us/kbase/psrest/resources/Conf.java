@@ -22,7 +22,7 @@ import us.kbase.psrest.util.SystemProperties;
  */
 
 // The Java class will be hosted at the URI path "/conf"
-@Path("/conf")
+@Path("/ps/conf")
 public class Conf {
     
 
