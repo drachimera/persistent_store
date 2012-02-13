@@ -17,7 +17,7 @@ import java.util.Set;
  */
 
 // The Java class will be hosted at the URI path "/example"
-@Path("/example")
+@Path("/ps/status")
 public class ExampleResource {
     
 
