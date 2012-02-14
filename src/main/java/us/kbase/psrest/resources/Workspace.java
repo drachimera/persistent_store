@@ -37,22 +37,56 @@ import us.kbase.psrest.util.Tokens;
 @Path("/ps")
 public class Workspace {
     
-    Mongo m = MongoConnection.getMongo();
-    DB db = m.getDB( Tokens.WORKSPACE_DATABASE );
-
-    
+     Mongo m = MongoConnection.getMongo();
+     
+     /**
+      * given a workspaceID - return all metadata about that workspace.
+      * @param workspaceID
+      * @return 
+      */
      @GET
      @Path("/workspace/{workspaceid}")
-     @Produces("text/xml")
-     public String getWorkspace(@PathParam("workspaceid") String workspaceID) {
-         System.err.println(workspaceID);
-         return workspaceID;
+     @Produces("application/json")
+     public String getWorkspaceJSON(@PathParam("workspaceid") String workspaceID) {
+         BasicDBObject dbo = new BasicDBObject(); 
+         DB db = m.getDB( Tokens.WORKSPACE_DATABASE );
+         DBCollection coll = db.getCollection(Tokens.METADATA_COLLECTION);
+         BasicDBObject query = new BasicDBObject(); 
+         BasicDBObject bo = (BasicDBObject) JSON.parse("{ key :\"" + workspaceID + "\" }"); //JSON2BasicDBObject
+         DBCursor dbc = coll.find(bo); 
+         return dbc.next().toString(); //need to catch exceptions and so on...
      }
+     
+     /**
+      * save a document to the workspace provided
+      * @param workspaceID
+      * @return 
+      */     
+     @PUT
+     @Path("/document/{workspaceid}")
+     //@Consumes("application/json")
+     @Produces("application/json")
+     public String saveDocument(@PathParam("workspaceid") String workspaceID, String jsonString) { //, String jsonString
+         //System.out.println(jsonString);
+         //System.out.println(workspaceID);
+         //System.out.println(jsonString);
+         DB db = m.getDB( Tokens.WORKSPACE_DATABASE );
+         DBCollection coll = db.getCollection(workspaceID);
+         BasicDBObject bo = (BasicDBObject) JSON.parse(jsonString);
+         WriteResult save = coll.save(bo);
+        //System.out.println(workspaceID);
+         return save.toString();
+     }
+     
+     
      
      @GET
      @Path("/documents/{workspaceid}")
      @Produces("application/json")
      public JSONObject getDocIDs(@PathParam("workspaceid") String workspaceID) {
+         
+         DB db = m.getDB( Tokens.WORKSPACE_DATABASE );
+         
          DBCollection coll = db.getCollection(workspaceID);
          DBCursor documents = coll.find();
          JSONObject docList = new JSONObject();
@@ -71,37 +105,27 @@ public class Workspace {
          return docList;
      }
      
-     //ps/store/<key> 
-     @PUT
-     @Path("/store/{workspaceid}")
-     @Produces("application/json")
-     @Consumes("application/json")
-     public JSONObject storeDocument( String message, @PathParam("workspaceid") String workspaceID){
-         DBCollection coll = db.getCollection(workspaceID);
-         BasicDBObject bo = (BasicDBObject) JSON.parse(message);
-         WriteResult save = coll.save(bo);
-         JSONObject response = new JSONObject();
-         try {
-             System.out.println(workspaceID);
-             System.out.println(message);
-             response.put("status", "success");
-             response.put("mongoresponse", save.toString());
-             response.put("content", message);
-         } catch (JSONException ex) {
-            Logger.getLogger(Workspace.class.getName()).log(Level.SEVERE, null, ex);
-         }
-         return response;
-     }
-     
-//     @GET
-//     @Produces("text/xml")
-//     [ID1,ID2,…] – IDs are all Strings 	ps/documents/<key> 	Get the id for all documents in your workspace identified by <key>
-     
-     public static void main(String[] args){
-         Workspace ws = new Workspace();
-         String wstr = ws.getWorkspace("abc123");
-         System.out.println(wstr);
-     }
+//     //ps/store/<key> 
+//     @PUT
+//     @Path("/store/{workspaceid}")
+//     @Produces("application/json")
+//     @Consumes("application/json")
+//     public JSONObject storeDocument( String message, @PathParam("workspaceid") String workspaceID){
+//         DBCollection coll = db.getCollection(workspaceID);
+//         BasicDBObject bo = (BasicDBObject) JSON.parse(message);
+//         WriteResult save = coll.save(bo);
+//         JSONObject response = new JSONObject();
+//         try {
+//             System.out.println(workspaceID);
+//             System.out.println(message);
+//             response.put("status", "success");
+//             response.put("mongoresponse", save.toString());
+//             response.put("content", message);
+//         } catch (JSONException ex) {
+//            Logger.getLogger(Workspace.class.getName()).log(Level.SEVERE, null, ex);
+//         }
+//         return response;
+//     }
     
 }
 

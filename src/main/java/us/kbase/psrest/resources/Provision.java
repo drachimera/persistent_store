@@ -58,20 +58,20 @@ public class Provision {
     @PUT
     // The Java method will produce content identified by the MIME Media
     // type "text/plain"
-    @Produces("text/plain")
+    @Produces("application/json")
     public String provision(@PathParam("ownerid") String ownerID) {
         String key = "invalidkey";
+        BasicDBObject dbo = new BasicDBObject(); 
         try {
             // Return some cliched textual content
             DB db = m.getDB( Tokens.WORKSPACE_DATABASE );
-            DBCollection coll = db.getCollection(Tokens.METADATA_COLLECTION);
-            BasicDBObject dbo = new BasicDBObject(); 
+            DBCollection coll = db.getCollection(Tokens.METADATA_COLLECTION);     
             dbo.put("owner", ownerID);         
             WriteResult wr = coll.save(dbo);
             ObjectId id = dbo.getObjectId("_id");
-            System.out.println("ID: " + id.toString());
-            key = HashUtil.SHA1(HashUtil.randcat(id.toString()));
-            System.out.println("ID: " + key);
+            //System.out.println("ID: " + id.toString());
+            key = "w" + HashUtil.SHA1(HashUtil.randcat(id.toString())); //we need to add w so we don't get keys that are invalid such as 7foobar
+            //System.out.println("ID: " + key);
             dbo.put("key", key);
             BasicDBObject query = new BasicDBObject(); query.put("_id", id);
             coll.update(query, dbo);
@@ -80,7 +80,7 @@ public class Provision {
         } catch (UnsupportedEncodingException ex) {
             Logger.getLogger(Provision.class.getName()).log(Level.SEVERE, null, ex);
         }
-        return key;
+        return dbo.toString();
     }
     
 
