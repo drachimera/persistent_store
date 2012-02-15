@@ -18,6 +18,7 @@ import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Scanner;
 
 
 /**
@@ -43,9 +44,14 @@ public class WebServer {
       public static void main(String[] args) throws IOException {
           HttpServer httpServer = startServer();
           System.out.println(String.format("Jersey app started with WADL available at "
-                  + "%sapplication.wadl\nTry out %sps/status\nHit enter to stop it...",
+                  + "%sapplication.wadl\nTry out %sps/status\nHit q enter to stop it...",
                   BASE_URI, BASE_URI));
-          System.in.read();
+          String inchar = "d";
+          Scanner scan = new Scanner (System.in);
+          while( !inchar.equalsIgnoreCase("q") ){
+              inchar = scan.next();
+          }
+          httpServer.stop();
           httpServer.stop();
       }    
     
