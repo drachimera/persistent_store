@@ -45,7 +45,7 @@ public class Conf {
                 count++;
             }
             if(count > 0){
-                configuration = configuration.substring(0,configuration.length());
+                configuration = configuration.substring(0,configuration.length()-2) + "\n";
             }
         } catch (IOException ex) {
             Logger.getLogger(Conf.class.getName()).log(Level.SEVERE, null, ex);
