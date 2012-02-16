@@ -40,7 +40,7 @@ public class Conf {
             Iterator i = properties.iterator();
             while(i.hasNext()){
                 String prop = (String) i.next();
-                configuration += prop + " : " + sysprop.get(prop) + "\n";
+                configuration += "\"" + prop + "\" : \"" + "\"" + sysprop.get(prop) + "\"\n";
             }
         } catch (IOException ex) {
             Logger.getLogger(Conf.class.getName()).log(Level.SEVERE, null, ex);

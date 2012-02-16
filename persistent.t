@@ -1,66 +1,80 @@
-#!/usr/bin/perl -w
-
-use strict;
-use warnings;
-
 use Test::More 'no_plan';
 use LWP::UserAgent;
 use HTTP::Request;
 use HTTP::Response;
 use JSON;
 
-my $HOST = "140.221.92.64";
+
+#
+# Configuration for the test
+#
+
+my $HOST = "140.221.92.56";
 my $PORT = "9998";
 my $DOMAIN = "";
 my $UID = "";
 my $PW = "";
-my $BASE_URL = "http://140.221.92.64";
+my $BASE_URL = "http://140.221.92.56".":".$PORT;
 
 my $browser = LWP::UserAgent->new;
 
-#
-# Test 3 - Submit a job and expect a successful result
-# (the first curl command from the README.md file)
-
-# initialize the uri - should be "http://localhost:8000/<command>/"
-my $uri = $BASE_URL . "jobs/";
+my $json = new JSON;
 
 # set the arguments and encode them into a JSON string
-my $args = { 'application' => 'blast',
-             'infile' => '/path/to/file',
-             'count' => 8 };
-my $json = new JSON;
-my $body = "data=" . $json->encode( $args );
+#my $args = { 'application' => 'blast',
+#             'infile' => '/path/to/file',
+#             'count' => 8 };
+#my $json = new JSON;
+#my $body = "data=" . $json->encode( $args );
+
+#
+# Test 1 - Make sure the server is up and running 
+#
+
+# initialize the uri - should be "http://localhost:8000/<command>/"
+my $uri = $BASE_URL . "/ps/status/";
 
 # set the http command (POST, GET, DELETE, or CHANGE)
-my $req = HTTP::Request->new( 'POST', $uri );
-$req->content( $body );
+my $req = HTTP::Request->new( 'GET', $uri );
+my $expres = "PSREST Server Up and Functioning";
 
 # make the request and get some results!
 my $response = $browser->request($req);
-
 ok( $response->is_success, "Did a job get submitted successfully?" );
+#
+# Test 2 - Make sure that the response content is a JSON string
+#
+my $gotres = $response->content;
+chomp $gotres;
+print $gotres."\n";
+is( $gotres, $expres,"Did the server return a expected status response?");
 
 
 #
-# Test 6 - Make sure that the response content is a JSON string
+# Test 3 - Configuration pulling test
 #
+$uri = $BASE_URL . "/ps/conf";
+$req = HTTP::Request->new( 'GET', $uri );
+$response = $browser->request($req);
 
-# get the job id from the response JSON
+print STDERR "-----------------\n";
+print STDERR $response->content;
+print STDERR "-----------------\n";
 my $response_hash;
+print STDERR "\n\n";
+print STDERR $json->decode( $response->content );
+print STDERR "\n\n";
 eval { $response_hash = $json->decode( $response->content ); };
-
 ok( defined($response_hash), "Did the server return a JSON-formatted response?");
 
+my $mongo_server = undef;
+$mongo_server = $response_hash->{'mongo_server'} if( defined( $response_hash->{'mongo_server'} ));
+ok( defined($mongo_server), "Does that response have an id field?" );
 
-#
-# Test 9 - Make sure there's a valid (integer) job id in the response
-#
-
-my $id;
-$id = $response_hash->{id} if( defined( $response_hash->{id} ));
-
-ok( defined($id), "Does that response have an id field?" );
+my $mongo_port = undef;
+$mongo_port = $response_hash->{'mongo_port'} if( defined( $response_hash->{'mongo_port'} ));
+ok( defined($mongo_port), "Does that response have an id field?" );
+die "";
 
 
 #
