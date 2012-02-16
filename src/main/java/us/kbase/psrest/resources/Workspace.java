@@ -20,6 +20,7 @@ import com.mongodb.DBObject;
 import com.mongodb.DBCursor;
 import com.mongodb.util.JSON;
 import java.net.UnknownHostException;
+import java.util.Iterator;
 import java.util.Set;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.PUT;
@@ -76,6 +77,33 @@ public class Workspace {
          WriteResult save = coll.save(bo);
         //System.out.println(workspaceID);
          return save.toString();
+     }
+     
+     /**
+      * save a document to the workspace provided
+      * @param workspaceID
+      * @return 
+      */     
+     @GET
+     @Path("/document/find/{workspaceid}")
+     @Consumes("application/json")
+     @Produces("application/json")
+     public String findDocument(@PathParam("workspaceid") String workspaceID, String jsonString) { //, String jsonString
+         String ret = "{\n";
+         //System.out.println(jsonString);
+         //System.out.println(workspaceID);
+         //System.out.println(jsonString);
+         DB db = m.getDB( Tokens.WORKSPACE_DATABASE );
+         DBCollection coll = db.getCollection(workspaceID);
+         BasicDBObject bo = (BasicDBObject) JSON.parse(jsonString);
+         DBCursor find = coll.find(bo);
+         Iterator<DBObject> iter = find.iterator();
+         while(iter.hasNext()){
+             ret+= iter.next().toString();
+         }
+         ret += "}\n";
+        //System.out.println(workspaceID);
+         return ret;
      }
      
      

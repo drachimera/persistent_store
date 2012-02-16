@@ -30,7 +30,7 @@ public class WebServer {
  
   
       private static URI getBaseURI() {
-          return UriBuilder.fromUri("http://localhost/").port(9998).build();
+          return UriBuilder.fromUri("http://0.0.0.0/").port(9998).build();
       }
   
       public static final URI BASE_URI = getBaseURI();
@@ -51,7 +51,6 @@ public class WebServer {
           while( !inchar.equalsIgnoreCase("q") ){
               inchar = scan.next();
           }
-          httpServer.stop();
           httpServer.stop();
       }    
     
