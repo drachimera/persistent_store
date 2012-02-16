@@ -5,8 +5,9 @@ include $(TOP_DIR)/tools/Makefile.common
 SERVICE =persistent_store 
 SERVICE_DIR = $(TARGET)/services/$(SERVICE)
 
-all: compile show-target
+export JAVA_HOME=/kb/runtime/java
 
+all: compile show-target
 
 deploy: deploy-services
 #config-rabbit deploy-services deploy-testworker
