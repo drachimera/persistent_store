@@ -34,13 +34,18 @@ public class Conf {
     public String getClichedMessage() {
         String configuration = "{\n";
         try {
+            int count = 0;
             // open the current configuration file
             SystemProperties sysprop = new SystemProperties();
             Set<String> properties = sysprop.propertySet();
             Iterator i = properties.iterator();
             while(i.hasNext()){
                 String prop = (String) i.next();
-                configuration += "\"" + prop + "\" : " + "\"" + sysprop.get(prop) + "\"\n";
+                configuration += "\"" + prop + "\" : " + "\"" + sysprop.get(prop) + "\",\n";
+                count++;
+            }
+            if(count > 0){
+                configuration = configuration.substring(0,configuration.length());
             }
         } catch (IOException ex) {
             Logger.getLogger(Conf.class.getName()).log(Level.SEVERE, null, ex);

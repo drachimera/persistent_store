@@ -57,13 +57,10 @@ $uri = $BASE_URL . "/ps/conf";
 $req = HTTP::Request->new( 'GET', $uri );
 $response = $browser->request($req);
 
-print STDERR "-----------------\n";
-print STDERR $response->content;
-print STDERR "-----------------\n";
+#print STDERR "-----------------\n";
+#print STDERR $response->content;
+#print STDERR "-----------------\n";
 my $response_hash;
-print STDERR "\n\n";
-print STDERR $json->decode( $response->content );
-print STDERR "\n\n";
 eval { $response_hash = $json->decode( $response->content ); };
 ok( defined($response_hash), "Did the server return a JSON-formatted response?");
 
