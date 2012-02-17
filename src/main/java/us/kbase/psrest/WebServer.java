@@ -4,6 +4,8 @@
  */
 package us.kbase.psrest;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import us.kbase.psrest.resources.*;
 
 import com.sun.jersey.api.container.grizzly2.GrizzlyServerFactory;
@@ -46,10 +48,18 @@ public class WebServer {
           System.out.println(String.format("Jersey app started with WADL available at "
                   + "%sapplication.wadl\nTry out %sps/status\nHit q enter to stop it...",
                   BASE_URI, BASE_URI));
-          String inchar = "d";
-          Scanner scan = new Scanner (System.in);
-          while( !inchar.equalsIgnoreCase("q") ){
-              inchar = scan.next();
+          //String inchar = "d";
+          //Scanner scan = new Scanner (System.in);
+          //while( !inchar.equalsIgnoreCase("q") ){
+          //    inchar = scan.next();
+          int foo = 5;
+          while (foo > 2 ){
+              foo = 6;
+            try {
+                Thread.sleep(9999999000L);
+            } catch (InterruptedException ex) {
+                Logger.getLogger(WebServer.class.getName()).log(Level.SEVERE, null, ex);
+            }
           }
           httpServer.stop();
       }    

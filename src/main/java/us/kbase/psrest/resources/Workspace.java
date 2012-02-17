@@ -99,14 +99,14 @@ public class Workspace {
          DBCursor find = coll.find(bo);
          Iterator<DBObject> iter = find.iterator();
          while(iter.hasNext()){
-             ret+= iter.next().toString();
+             DBObject next = iter.next();
+             ret+= "\" kbid : \""; 
+             ret+= next.toString();
          }
-         ret += "}\n";
+         ret += "\n}\n";
         //System.out.println(workspaceID);
          return ret;
      }
-     
-     
      
      @GET
      @Path("/documents/{workspaceid}")
