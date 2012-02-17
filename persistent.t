@@ -12,7 +12,7 @@ use String::Random;
 #
 
 my $RANDOM_ITER = 10;
-my $RANDOM_STR_LEN = 10;
+my $RANDOM_MAX_ITEMS = 10;
 
 my $HOST = "140.221.92.56";
 my $PORT = "9998";
@@ -129,14 +129,24 @@ ok( defined($key), "Does the response have a 'key' field?" );
 # put document into the key
 my $idx = 0;
 my $sr = new String::Random;
+my @all_args = ();
 while ($idx < $RANDOM_ITER) {
-  my $dkey = $sr->randregex('CCccccccccc');
-  my $dval = $sr->randregex('\d\d\d\d\d\d\d\d\d');
+
+  my $iterms = int(rand($RANDOM_MAX_ITEMS)) + 1;
+  my $sidx = 0;
+  my %args = ();
+  while( $sidx < $iterms) {
+    my $dkey = $sr->randpattern('CCcc!ccn');
+    my $dval = $sr->randregex('\d\d\d\d\d\d\d\d\d');
+    $args{$dkey} = $dval;
+    $sidx = $sidx + 1;
+  }
+  push @all_args, \%args;
+
   $uri = $BASE_URL . "/ps/document/" . $testuser_key;
   $req = HTTP::Request->new( 'PUT', $uri );
   
-  my $args = { $dkey => $dval };
-  my $body = $json->encode( $args );
+  my $body = $json->encode( \%args );
   $req->content( $body );
   $response = $browser->request($req);
   
@@ -156,7 +166,20 @@ while ($idx < $RANDOM_ITER) {
   print STDERR "--------------\n";
   #print STDERR Data::Dumper->Dump([$response]);
   print STDERR Data::Dumper->Dump([$response_hash]);
-  is($response_hash->{'x'}, 1, "Do we get the stored input?");
+
+  my $foundid = undef;
+  foreach my $dkey (keys %args) {
+    if(! defined $foundid) {
+      foreach my $id (keys %$response_hash) {
+        if( defined $response_hash->{$id}->{$dkey} ) {
+          $foundid = $id;
+          last;
+        }
+      }
+    }
+
+    is($response_hash->{$foundid}->{$dkey}, $dval, "Do we get the stored input?");
+  }
 
   $idx = $idx + 1;
 }
