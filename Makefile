@@ -23,6 +23,7 @@ deploy-services:
 	cp -rf target $(SERVICE_DIR)
 	cp -rf deployment/* $(SERVICE_DIR)
 	cp -rf conf/sys.properties $(SERVICE_DIR)
+	cp -rf conf $(SERVICE_DIR)
 #	rsync -avz --exclude .git *.py start_service stop_service test_service qsub_test.sh job_service $(SERVICE_DIR)
 #	cat config.ini.sample |sed "s/XXXXXX/$(RMQ_PASS)/" > $(SERVICE_DIR)/config.ini
 #	cd $(SERVICE_DIR);echo no|python ./manage.py syncdb
