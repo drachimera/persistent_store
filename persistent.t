@@ -3,7 +3,7 @@ use LWP::UserAgent;
 use HTTP::Request;
 use HTTP::Response;
 use JSON;
-
+use Data::Dumper;
 
 #
 # Configuration for the test
@@ -40,7 +40,7 @@ my $expres = "PSREST Server Up and Functioning";
 
 # make the request and get some results!
 my $response = $browser->request($req);
-ok( $response->is_success, "Did a job get submitted successfully?" );
+ok( $response->is_success, "Is the server up and running?" );
 #
 # Test 2 - Make sure that the response content is a JSON string
 #
@@ -60,19 +60,97 @@ $response = $browser->request($req);
 #print STDERR "-----------------\n";
 #print STDERR $response->content;
 #print STDERR "-----------------\n";
+ok( defined($response), "Did the server return a configuration response?");
+
 my $response_hash;
 eval { $response_hash = $json->decode( $response->content ); };
-ok( defined($response_hash), "Did the server return a JSON-formatted response?");
+ok( defined($response_hash), "Is the conf response a well-formatted JSON object?");
 
 my $mongo_server = undef;
 $mongo_server = $response_hash->{'mongo_server'} if( defined( $response_hash->{'mongo_server'} ));
-ok( defined($mongo_server), "Does that response have an id field?" );
+ok( defined($mongo_server), "Does that response have a 'mongo_server' field?" );
 
 my $mongo_port = undef;
 $mongo_port = $response_hash->{'mongo_port'} if( defined( $response_hash->{'mongo_port'} ));
-ok( defined($mongo_port), "Does that response have an id field?" );
-die "";
+ok( defined($mongo_port), "Does that response have an 'mongo_port' field?" );
 
+
+####
+# Tests on provisioning a workspace
+####
+my $user = "testuser";
+$uri = $BASE_URL . "/ps/provision/" . $user;
+$req = HTTP::Request->new( 'PUT', $uri );
+$response = $browser->request($req);
+
+ok( defined($response), "Did the server provision a workspace for '$user'?");
+
+my $response_hash;
+eval { $response_hash = $json->decode( $response->content ); };
+ok( defined($response_hash), "Is the provision response a well-formatted JSON object?");
+
+ok( defined($response_hash->{"owner"}), "Does that response have an 'owner' field?" );
+
+is( $response_hash->{"owner"}, $user, "Does that 'owner' field = '$user'?");
+
+ok( defined($response_hash->{"_id"}), "Does the response have an '_id' field?" );
+
+isa_ok( $response_hash->{"_id"}, "HASH", "Does that '_id' field reference a hash?" );
+
+my $key = $response_hash->{"key"};
+my $testuser_key = $key;
+ok( defined($key), "Does the response have a 'key' field?" );
+
+# null user
+$user = "";
+$uri = $BASE_URL . "/ps/provision/" . $user;
+$req = HTTP::Request->new( 'PUT', $uri );
+$response = $browser->request($req);
+
+eval{ $response_hash = $json->decode($response); };
+ok( defined($@), "Does the server return an error when workspace is requested for a null user?");
+
+# whitespace user
+$user = "   ";
+$uri = $BASE_URL . "/ps/provision/" . $user;
+$req = HTTP::Request->new( 'PUT', $uri );
+$response = $browser->request($req);
+
+eval{ $response_hash = $json->decode($response); };
+ok( defined($@), "Does the server return an error when workspace is requested for a whitespace user?");
+$key = $response_hash->{"key"};
+ok( defined($key), "Does the response have a 'key' field?" );
+
+# put document into the key
+$uri = $BASE_URL . "/ps/document/" . $testuser_key;
+$req = HTTP::Request->new( 'PUT', $uri );
+
+my $args = { 'x' => 1 };
+my $body = $json->encode( $args );
+print STDERR '--------------';
+print STDERR $body;
+print STDERR "\n$testuser_key\n";
+print STDERR '--------------';
+$req->content( $body );
+
+$response = $browser->request($req);
+
+eval{ $response_hash = $json->decode($response); };
+ok( defined($@), "Does the server return any output for putting contents of the testuser?");
+
+# test the document
+$uri = $BASE_URL . "/ps/document/find/" . $testuser_key;
+$req = HTTP::Request->new( 'GET', $uri );
+
+$response = $browser->request($req);
+
+eval{ $response_hash = $json->decode($response->content); };
+ok( defined($@), "Does the server return the contents of the testuser?");
+print STDERR Data::Dumper->Dump([$response_hash]);
+is($response_hash->{'x'}, 1, "Do we get the stored input?");
+
+__END__
+die "";
 
 #
 # Test 12 - Can we retrieve a valid job id?
