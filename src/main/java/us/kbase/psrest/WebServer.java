@@ -35,7 +35,7 @@ public class WebServer {
         try {
             SystemProperties sysprop = new SystemProperties();
             Integer port = new Integer(sysprop.get("psrest_port"));
-            return UriBuilder.fromUri("http://0.0.0.0/").port(7037).build();
+            return UriBuilder.fromUri("http://0.0.0.0/").port(port).build();
         } catch (IOException ex) {
             Logger.getLogger(WebServer.class.getName()).log(Level.SEVERE, null, ex);
         }
