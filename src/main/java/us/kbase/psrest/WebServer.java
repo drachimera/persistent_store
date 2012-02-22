@@ -21,6 +21,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Scanner;
+import us.kbase.psrest.util.SystemProperties;
 
 
 /**
@@ -28,11 +29,17 @@ import java.util.Scanner;
  * @author Daniel J. Quest
  * @date   January 9 2012
  */
-public class WebServer {
- 
+public class WebServer {  
   
       private static URI getBaseURI() {
-          return UriBuilder.fromUri("http://0.0.0.0/").port(9998).build();
+        try {
+            SystemProperties sysprop = new SystemProperties();
+            Integer port = new Integer(sysprop.get("psrest_port"));
+            return UriBuilder.fromUri("http://0.0.0.0/").port(7037).build();
+        } catch (IOException ex) {
+            Logger.getLogger(WebServer.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return UriBuilder.fromUri("http://0.0.0.0/").port(7037).build();
       }
   
       public static final URI BASE_URI = getBaseURI();
@@ -46,7 +53,7 @@ public class WebServer {
       public static void main(String[] args) throws IOException {
           HttpServer httpServer = startServer();
           System.out.println(String.format("Jersey app started with WADL available at "
-                  + "%sapplication.wadl\nTry out %sps/status\nHit q enter to stop it...",
+                  + "%sapplication.wadl\nTry out %sps/status\nHit control-C to stop it...",
                   BASE_URI, BASE_URI));
           //String inchar = "d";
           //Scanner scan = new Scanner (System.in);

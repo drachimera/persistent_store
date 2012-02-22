@@ -15,11 +15,12 @@ my $RANDOM_ITER = 10;
 my $RANDOM_MAX_ITEMS = 10;
 
 my $HOST = "140.221.92.56";
-my $PORT = "9998";
+my $PORT = "7037";
 my $DOMAIN = "";
 my $UID = "";
 my $PW = "";
-my $BASE_URL = "http://140.221.92.56".":".$PORT;
+my $BASE_URL = "http://localhost".":".$PORT;
+#my $BASE_URL = "http://140.221.92.56".":".$PORT;
 
 my $browser = LWP::UserAgent->new;
 
