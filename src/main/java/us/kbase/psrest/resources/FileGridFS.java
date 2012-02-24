@@ -23,6 +23,14 @@ import java.lang.String;
 import java.net.UnknownHostException;
 
 //mongo
+import com.mongodb.WriteResult;
+import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.ws.rs.GET;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+
 import com.mongodb.Mongo;
 import com.mongodb.DB;
 import com.mongodb.DBCollection;
@@ -63,6 +71,16 @@ import com.sun.jersey.core.header.FormDataContentDisposition;
 import com.sun.jersey.multipart.FormDataParam;
 
 //kbase
+import java.io.File;
+import java.io.InputStream;
+import java.net.UnknownHostException;
+import java.util.Iterator;
+import java.util.Set;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.PUT;
+import javax.ws.rs.PathParam;
+import org.codehaus.jettison.json.JSONException;
+import org.codehaus.jettison.json.JSONObject;
 import us.kbase.psrest.util.MongoConnection;
 import us.kbase.psrest.util.SystemProperties;
 import us.kbase.psrest.util.Tokens;
@@ -97,6 +115,7 @@ public class FileGridFS {
 //        }
 //     
 //   } 
+
     
      /**
       * save a file with name <filename> to a workspace, <workpace_id> 
@@ -105,6 +124,7 @@ public class FileGridFS {
       * @param workspaceID
       * @return 
       */
+
 //     @PUT
 //     @Path("/{workspace_id}/n/{filename}")
 //     @Consumes("text/plain")
@@ -128,6 +148,30 @@ public class FileGridFS {
 //        DBObject metaData = createFile.getMetaData();
 //        return metaData.toString();
 //     }
+
+     @PUT
+     @Path("/{workspace_id}/n/{filename}")
+     @Consumes("text/plain")
+     @Produces("application/json")
+     public String saveFile(@PathParam("workspace_id") String workspaceID, @PathParam("filename") String filename, InputStream instream) {
+        DB db = m.getDB( Tokens.WORKSPACE_DATABASE );
+        System.out.println("********************************");
+        System.out.println(instream.toString());
+        System.out.println("doing instream read");
+        System.out.println("********************************");
+        try {
+            System.out.println(instream.read());
+        } catch (IOException ex) {
+            Logger.getLogger(FileGridFS.class.getName()).log(Level.SEVERE, null, ex);
+        }
+//        System.out.println(instream.available());
+        GridFS myFS = new GridFS(db, workspaceID);              // returns a default GridFS (e.g. "fs" root collection)
+        GridFSInputFile createFile = myFS.createFile(instream, filename);
+        //createFile.setFilename(filename);
+        createFile.save();
+        DBObject metaData = createFile.getMetaData();
+        return metaData.toString();
+     }
      
      @GET
      @Path("/{workspace_id}")
