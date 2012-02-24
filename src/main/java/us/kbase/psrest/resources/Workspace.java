@@ -93,14 +93,16 @@ public class Workspace {
          //System.out.println(jsonString);
          //System.out.println(workspaceID);
          //System.out.println(jsonString);
+         int counter = 0;
          DB db = m.getDB( Tokens.WORKSPACE_DATABASE );
          DBCollection coll = db.getCollection(workspaceID);
          BasicDBObject bo = (BasicDBObject) JSON.parse(jsonString);
          DBCursor find = coll.find(bo);
          Iterator<DBObject> iter = find.iterator();
          while(iter.hasNext()){
+             counter++;
              DBObject next = iter.next();
-             ret+= "\" kbid : \""; 
+             ret+= "\"kbid" + counter + "\" : "; 
              ret+= next.toString();
          }
          ret += "\n}\n";

@@ -9,11 +9,17 @@ import com.mongodb.Bytes;
 import com.mongodb.DBObject;
 import com.mongodb.DBCursor;
 import com.mongodb.MongoException;
+import com.mongodb.gridfs.GridFS;
+import com.mongodb.gridfs.GridFSDBFile;
+import com.mongodb.gridfs.GridFSInputFile;
+import java.io.IOException;
 import java.net.UnknownHostException;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import com.mongodb.util.JSON;
+import java.io.File;
+import java.util.Iterator;
 import java.util.List;
 import org.bson.types.BSONTimestamp;
 
@@ -22,7 +28,7 @@ import org.bson.types.BSONTimestamp;
  * @author Daniel J. Quest
  */
 public class MongoExample {
-    private String host = "140.221.92.69";//"192.168.6.188"; //"localhost";
+    private String host = "localhost";//"140.221.92.69";//"192.168.6.188"; //
     private int port = 27017;
     private String databasename = "test";//"workspace";//
     /**
@@ -161,6 +167,51 @@ public class MongoExample {
         return col.getCount();
     }
     
+    public void gridFSSaveExamp(DB myDatabase, String filename){
+        try {
+            /*
+             * default root collection usage - must be supported
+             */
+            System.out.println("gridFSSaveExamp");
+            GridFS myFS = new GridFS(myDatabase);              // returns a default GridFS (e.g. "fs" root collection)
+            GridFSInputFile createFile = myFS.createFile(new File(filename));
+            createFile.save();
+            //myFS.storeFile(new File("/tmp/largething.mpg"));   // saves the file into the "fs" GridFS store
+        } catch (IOException ex) {
+            Logger.getLogger(MongoExample.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
+    }
+
+    
+    public void gridFSListFiles(DB myDatabase){
+        System.out.println("gridFSListFiles");
+        GridFS myFS = new GridFS(myDatabase);
+        System.out.println("*Bucket Name: " + myFS.getBucketName());
+        DBCursor fileList = myFS.getFileList();
+        System.out.println(fileList.size() + " files:");
+        while(fileList.hasNext()){
+            GridFSDBFile f = (GridFSDBFile) fileList.next();
+            System.out.println("*" + f.getFilename());
+        }
+        
+    }
+    
+    public void gridFSgetExamp(DB myDatabase, String filename){
+        try {
+            /*
+             * specified root collection usage - optional
+             */
+            System.out.println("gridFSgetExamp");
+            GridFS myFS = new GridFS(myDatabase, "contracts");             // returns a GridFS where  "contracts" is root
+            GridFSDBFile findOne = myFS.findOne(filename);
+            findOne.writeTo("/tmp"+filename+"2");
+            //myFS.retrieveFile("smithco", new File("/tmp/smithco_20090105.pdf"));  // retrieves object whose filename is "smithco"
+        } catch (IOException ex) {
+            Logger.getLogger(MongoExample.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+    
     public void query1(DBCollection col){
         System.out.println("query1");
         //select * from things where name = "Mongo";
@@ -264,7 +315,15 @@ public class MongoExample {
         mt.query3(col);
         mt.createAndCountIndex(col);
         mt.testErrors(db);
-        mt.deleteCollection(col);
+        //gridfs
+        mt.gridFSSaveExamp(db, "/tmp/test.txt");
+        mt.gridFSListFiles(db);
+        mt.gridFSgetExamp(db, "test.txt");
+//        mt.deleteCollection(col);
+//        DBCollection filescol = mt.getCollection("fs.files", db);
+//        mt.deleteCollection(filescol);
+//        DBCollection chunkscol = mt.getCollection("fs.chunks", db);
+//        mt.deleteCollection(chunkscol);
     }
     
     

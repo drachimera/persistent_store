@@ -12,15 +12,20 @@ import com.sun.jersey.api.container.grizzly2.GrizzlyServerFactory;
 import com.sun.jersey.api.core.DefaultResourceConfig;
 import com.sun.jersey.api.core.PackagesResourceConfig;
 import com.sun.jersey.api.core.ResourceConfig;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
 import org.glassfish.grizzly.http.server.HttpServer;
 
 import javax.ws.rs.core.UriBuilder;
 import java.io.IOException;
+import java.lang.management.ManagementFactory;
 import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Scanner;
+import us.kbase.psrest.util.SystemProperties;
 
 
 /**
@@ -28,11 +33,17 @@ import java.util.Scanner;
  * @author Daniel J. Quest
  * @date   January 9 2012
  */
-public class WebServer {
- 
+public class WebServer {  
   
       private static URI getBaseURI() {
-          return UriBuilder.fromUri("http://0.0.0.0/").port(9998).build();
+        try {
+            SystemProperties sysprop = new SystemProperties();
+            Integer port = new Integer(sysprop.get("psrest_port"));
+            return UriBuilder.fromUri("http://0.0.0.0/").port(port).build();
+        } catch (IOException ex) {
+            Logger.getLogger(WebServer.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return UriBuilder.fromUri("http://0.0.0.0/").port(7037).build();
       }
   
       public static final URI BASE_URI = getBaseURI();
@@ -43,15 +54,33 @@ public class WebServer {
           return GrizzlyServerFactory.createHttpServer(BASE_URI, rc);
       }
       
+      protected static int writePID(BufferedWriter out){
+        try {
+            String pidstring = ManagementFactory.getRuntimeMXBean().getName();
+            String[] split = pidstring.split("@");
+            Integer p = new Integer(split[0]);
+            System.out.println("PID: " + p);
+            out.write(p.toString());
+            out.close();          
+            return p;
+        } catch (IOException ex) {
+            Logger.getLogger(WebServer.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return 0;
+      }
+      
       public static void main(String[] args) throws IOException {
           HttpServer httpServer = startServer();
           System.out.println(String.format("Jersey app started with WADL available at "
-                  + "%sapplication.wadl\nTry out %sps/status\nHit q enter to stop it...",
+                  + "%sapplication.wadl\nTry out %sps/status\nHit control-C to stop it...",
                   BASE_URI, BASE_URI));
           //String inchar = "d";
           //Scanner scan = new Scanner (System.in);
           //while( !inchar.equalsIgnoreCase("q") ){
           //    inchar = scan.next();
+                     // Create file 
+          FileWriter fstream = new FileWriter("service.pid");
+          writePID(new BufferedWriter(fstream));
           int foo = 5;
           while (foo > 2 ){
               foo = 6;
