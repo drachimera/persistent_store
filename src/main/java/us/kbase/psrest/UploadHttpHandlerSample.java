@@ -43,6 +43,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -115,6 +117,10 @@ public class UploadHttpHandlerSample {
         @Override
         public void service(final Request request,
                             final Response response) throws Exception {
+            
+            // get file path
+            final String path = request.getDecodedRequestURI();
+            System.out.println(path);
 
             final NIOInputStream in = request.getInputStream(false);//.getNIOInputStream(); // put the stream in non-blocking mode
             

@@ -14,5 +14,6 @@ package us.kbase.psrest.util;
 public class Tokens {
     public static final String WORKSPACE_DATABASE = "workspace";
     public static final String METADATA_COLLECTION = "meta";
+    public static final int CHUNK_SIZE = 8192;
     
 }

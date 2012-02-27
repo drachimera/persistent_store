@@ -22,6 +22,8 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
 import org.apache.commons.io.IOUtils;
+import org.glassfish.grizzly.http.server.Request;
+import org.glassfish.grizzly.http.server.io.NIOInputStream;
 //import org.jboss.resteasy.plugins.providers.multipart.InputPart;
 //import org.jboss.resteasy.plugins.providers.multipart.MultipartFormDataInput;
  
@@ -33,7 +35,8 @@ public class UploadFileService {
 
         @POST
 	@Consumes(MediaType.MULTIPART_FORM_DATA)
-        public String uploadFile(InputStream uploadedInputStream){
+        public String uploadFile(Request request){
+            NIOInputStream uploadedInputStream = request.getInputStream();
             
             String uploadedFileLocation = "/tmp/harhar.txt";
             writeToFile(uploadedInputStream, uploadedFileLocation);
