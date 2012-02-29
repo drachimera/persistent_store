@@ -101,6 +101,7 @@ public class Workspace {
          Iterator<DBObject> iter = find.iterator();
          while(iter.hasNext()){
              counter++;
+             if(counter > 1) ret += ",";
              DBObject next = iter.next();
              ret+= "\"kbid" + counter + "\" : "; 
              ret+= next.toString();
