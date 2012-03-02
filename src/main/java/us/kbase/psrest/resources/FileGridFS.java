@@ -1,4 +1,6 @@
 /*
+ * 
+ *   Note: this may become depricated...
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
@@ -166,7 +168,7 @@ public class FileGridFS {
         }
 //        System.out.println(instream.available());
         GridFS myFS = new GridFS(db, workspaceID);              // returns a default GridFS (e.g. "fs" root collection)
-        GridFSInputFile createFile = myFS.createFile(instream, filename);
+        GridFSInputFile createFile = myFS.createFile(instream, filename); 
         //createFile.setFilename(filename);
         createFile.save();
         DBObject metaData = createFile.getMetaData();

@@ -145,3 +145,5 @@ MORE HELP
   and db.whatever to see a summary of methods available.
   MongoDB Manual: http://www.mongodb.org/display/DOCS/Manual
 
+Gotchas:
+http://www.vancelucas.com/blog/mongodb-gotchas/

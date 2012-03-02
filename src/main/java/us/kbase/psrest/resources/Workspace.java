@@ -6,6 +6,7 @@ package us.kbase.psrest.resources;
 
 import com.mongodb.WriteResult;
 import java.io.IOException;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.ws.rs.GET;
@@ -23,8 +24,10 @@ import java.net.UnknownHostException;
 import java.util.Iterator;
 import java.util.Set;
 import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
 import javax.ws.rs.PUT;
 import javax.ws.rs.PathParam;
+import org.bson.types.ObjectId;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 import us.kbase.psrest.util.MongoConnection;
@@ -79,6 +82,38 @@ public class Workspace {
          return save.toString();
      }
      
+     @DELETE
+     @Path("/delete_workspace/{workspaceid}")
+     @Produces("application/json")
+     public String deleteWorkspace(@PathParam("workspaceid") String workspaceID){
+         DB db = m.getDB( Tokens.WORKSPACE_DATABASE );
+         DBCollection coll = db.getCollection(workspaceID);
+         coll.drop();
+         BasicDBObject bo = new BasicDBObject();
+         bo.append("status", "workspace= " + workspaceID + " deleted");
+         return bo.toString(); 
+     }
+   
+     @DELETE 
+     @Path("/delete/{workspaceid}/document/{documentid}")
+     @Produces("application/json")
+     public String deleteDocument(@PathParam("workspaceid") String workspaceID, @PathParam("documentid") String documentID){        
+         DB db = m.getDB( Tokens.WORKSPACE_DATABASE );
+         DBCollection coll = db.getCollection(workspaceID);
+         DBObject deleteme = findbyIDquery(coll, documentID);
+         coll.remove(deleteme);
+         BasicDBObject bo = new BasicDBObject();
+         bo.append("status", "document= " + workspaceID + " deleted");
+         //System.out.println(bo.toString());
+         return bo.toString(); 
+     }
+     
+     public DBObject findbyIDquery(DBCollection coll, String docid){
+         //use something like {_id:ObjectId("4f4feac16970c538d322f61d")} inside of findOne()
+        DBObject searchById = new BasicDBObject("_id", new ObjectId(docid));
+        return coll.findOne(searchById);
+     }
+     
      /**
       * save a document to the workspace provided
       * @param workspaceID
@@ -89,7 +124,8 @@ public class Workspace {
      @Consumes("application/json")
      @Produces("application/json")
      public String findDocument(@PathParam("workspaceid") String workspaceID, String jsonString) { //, String jsonString
-         String ret = "{\n";
+         StringBuffer ret = new StringBuffer();
+         ret.append("{\n");
          //System.out.println(jsonString);
          //System.out.println(workspaceID);
          //System.out.println(jsonString);
@@ -101,14 +137,17 @@ public class Workspace {
          Iterator<DBObject> iter = find.iterator();
          while(iter.hasNext()){
              counter++;
-             if(counter > 1) ret += ",";
+             if(counter > 1) ret.append(",\n");
              DBObject next = iter.next();
-             ret+= "\"kbid" + counter + "\" : "; 
-             ret+= next.toString();
+             Map toMap = next.toMap();
+             ret.append("\"" + toMap.get("_id").toString() + "\" : ");
+             //ret+= "\"kbid" + counter + "\" : "; 
+             String rec = next.toString().replaceAll("<dot>", ".");
+             ret.append(rec);
          }
-         ret += "\n}\n";
+         ret.append("\n}\n");
         //System.out.println(workspaceID);
-         return ret;
+         return ret.toString();
      }
      
      @GET
@@ -125,14 +164,14 @@ public class Workspace {
          try {
              while(documents.hasNext()){
                     DBObject next = documents.next();
-                    System.out.println(next.get("_id"));
+                    //System.out.println(next.get("_id"));
                     docList.put(new Integer(counter).toString(), next.get("_id"));
                     counter++;
              }
          } catch (JSONException ex) {
             Logger.getLogger(Workspace.class.getName()).log(Level.SEVERE, null, ex);
          }
-         System.err.println(workspaceID);
+         //System.err.println(workspaceID);
          return docList;
      }
      
