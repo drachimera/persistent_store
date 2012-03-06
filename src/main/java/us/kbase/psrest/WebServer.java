@@ -103,7 +103,7 @@ public class WebServer {
             final ServerConfiguration config = server.getServerConfiguration();
 
             // Map the path, /upload, to the NonBlockingUploadHandler
-            config.addHttpHandler(new NonBlockingUploadHandler(), "/upload");
+            config.addHttpHandler(new NonBlockingUploadHandler(), "/ps/upload");
 
             try {
                 server.start();

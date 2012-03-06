@@ -23,6 +23,7 @@ import com.mongodb.MongoException;
 import com.mongodb.gridfs.GridFS;
 import com.mongodb.util.SimplePool;
 import com.mongodb.util.Util;
+import java.nio.channels.Channel;
 
 /**
 * This class represents a GridFS file to be written to the database
@@ -33,6 +34,8 @@ import com.mongodb.util.Util;
 * @author Eliot Horowitz and Guy K. Kloss
 */
 public class PSGridFSInputFile extends PSGridFSFile {
+    
+
 
     /**
 * Default constructor setting the GridFS file name and providing an input

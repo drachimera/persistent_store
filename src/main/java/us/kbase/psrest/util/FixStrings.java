@@ -15,13 +15,30 @@ public class FixStrings {
     public static final String dot = "<dot>";
     public static final String dollar = "<dollar>";
     public static final String tilda = "<tilda>";
+    public static final String backslash = "<backslash>";
+    public static final String singlequote = "<singlequote>";
+    public static final String doublequote = "<doublequote>";
     
     public static String usr2mongo(String s){
-        return s.replaceAll("\\.", dot).replaceAll("\\$", dollar).replaceAll("~", tilda);
+        String r = s.replaceAll("\\.", dot);
+        r =  r.replaceAll("\\$", dollar);
+        r = r.replaceAll("~", tilda);
+        r = r.replaceAll("\\", backslash);       
+        r = r.replaceAll("'", singlequote);
+        r = r.replaceAll("\"", doublequote);
+        if(r.startsWith(doublequote)) r = r.replaceFirst(doublequote, "\"");
+        if(r.matches(doublequote + "$")) r = r.replaceAll(doublequote + "$", "\"");
+        return r;
     }
     
     public static String mongo2usr(String s){
-        return s.replaceAll(dot, ".").replaceAll(dollar, "$").replaceAll(tilda, "~");
+        String r = s.replaceAll(dot, "\\.");
+        r = r.replaceAll(dollar, "\\$");
+        r = r.replaceAll(tilda, "~");
+        r = r.replaceAll(backslash, "\\");
+        r = r.replaceAll(singlequote, "'");
+        r = r.replaceAll(doublequote, "\"");
+        return r;
     }
     
 }

@@ -30,6 +30,7 @@ import javax.ws.rs.PathParam;
 import org.bson.types.ObjectId;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
+import us.kbase.psrest.util.CreateUser;
 import us.kbase.psrest.util.MongoConnection;
 import us.kbase.psrest.util.SystemProperties;
 import us.kbase.psrest.util.Tokens;
@@ -52,12 +53,27 @@ import us.kbase.psrest.util.Tokens;
  */
 @Path("/ps/ws")
 public class User {
+    
+    Mongo m = MongoConnection.getMongo();
+    
     //create workspace by alias
-    //list workspaces
+    @Path("/{ownerid}/a/{alias}")
+    public String provisionByAlias(@PathParam("ownerid") String ownerID, @PathParam("alias") String alias ) {
+        Provision p = new Provision();
+        String provision = p.provision(ownerID);
+        System.out.println(provision);
+        return provision;
+    }
+    //list workspaces owned by a user
     //list users
     //list alias names
     //given workspace_id give back alias
     //change alias
     //provide access to a workspace by alias
+    
+    public void create_user(String username){
+        CreateUser cu = new CreateUser();
+        cu.create_user(username);
+    }
     
 }

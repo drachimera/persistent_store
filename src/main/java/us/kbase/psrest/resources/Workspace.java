@@ -58,7 +58,7 @@ public class Workspace {
          BasicDBObject query = new BasicDBObject(); 
          BasicDBObject bo = (BasicDBObject) JSON.parse("{ key :\"" + workspaceID + "\" }"); //JSON2BasicDBObject
          DBCursor dbc = coll.find(bo); 
-         return dbc.next().toString(); //need to catch exceptions and so on...
+         return dbc.next().toString() + "\n"; //need to catch exceptions and so on...
      }
      
      /**
@@ -79,7 +79,7 @@ public class Workspace {
          BasicDBObject bo = (BasicDBObject) JSON.parse(jsonString);
          WriteResult save = coll.save(bo);
         //System.out.println(workspaceID);
-         return save.toString();
+         return bo.toString() + "\n";
      }
      
      @DELETE
@@ -91,7 +91,7 @@ public class Workspace {
          coll.drop();
          BasicDBObject bo = new BasicDBObject();
          bo.append("status", "workspace= " + workspaceID + " deleted");
-         return bo.toString(); 
+         return bo.toString()+"\n"; 
      }
    
      @DELETE 
@@ -141,6 +141,8 @@ public class Workspace {
              DBObject next = iter.next();
              Map toMap = next.toMap();
              ret.append("\"" + toMap.get("_id").toString() + "\" : ");
+             //remove the redundant id
+             next.removeField("_id"); 
              //ret+= "\"kbid" + counter + "\" : "; 
              String rec = next.toString().replaceAll("<dot>", ".");
              ret.append(rec);
