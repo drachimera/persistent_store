@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+echo deleting: $1
+curl -X DELETE http://$PS_HOST:$PSREST_PORT/ps/delete/$PS_WORKSPACE/document/$1

@@ -1,0 +1,2 @@
+echo $PS_USR
+curl -X PUT http://$PS_HOST:$PSREST_PORT/ps/provision/$PS_USR

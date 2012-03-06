@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+echo saving: $1
+curl -X POST -F file=@$1  http://$PS_HOST:$PS_UPLOAD_PORT/ps/upload
