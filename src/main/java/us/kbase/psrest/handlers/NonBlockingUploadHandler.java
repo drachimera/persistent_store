@@ -56,9 +56,8 @@ import us.kbase.psrest.util.Tokens;
 
             final NIOInputStream in = request.getInputStream(false);//.getNIOInputStream(); // put the stream in non-blocking mode
             
-            final String filename = "./" + counter.incrementAndGet() + ".upload";
-            final FileChannel fileChannel = new FileOutputStream(
-                    filename).getChannel();
+            final String filename = "./upload" + counter.incrementAndGet();
+            final FileChannel fileChannel = new FileOutputStream(filename).getChannel();
             
             response.suspend();  // !!! suspend the Request
 

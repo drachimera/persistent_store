@@ -56,8 +56,8 @@ public class TabResource {
      @Produces("application/json")
      public String saveTabFile(@PathParam("workspaceid") String workspaceID, String tabFile) { //, String jsonString
          
-         System.out.println(tabFile);
-         System.out.println(workspaceID);
+         //System.out.println(tabFile);
+         //System.out.println(workspaceID);
          String[] headers = null;
          DB db = m.getDB( Tokens.WORKSPACE_DATABASE );
          DBCollection coll = db.getCollection(workspaceID);
@@ -85,9 +85,9 @@ public class TabResource {
                      String v = cols[j].replaceAll("\\.", "<dot>");
                      v = v.replaceAll("\\$", "<dollar>");
                      bo.put(headers[j], v);
-                     System.out.println(headers[j] + " : " + v);
+                     //System.out.println(headers[j] + " : " + v);
                  }
-                 System.out.println("Saving: " + lines[i]);
+                 //System.out.println("Saving: " + lines[i]);
                  WriteResult save = coll.save(bo);
                  
              }

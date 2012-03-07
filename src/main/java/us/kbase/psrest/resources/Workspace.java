@@ -25,6 +25,7 @@ import java.util.Iterator;
 import java.util.Set;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
+import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.PathParam;
 import org.bson.types.ObjectId;
@@ -71,6 +72,27 @@ public class Workspace {
      //@Consumes("application/json")
      @Produces("application/json")
      public String saveDocument(@PathParam("workspaceid") String workspaceID, String jsonString) { //, String jsonString
+         //System.out.println(jsonString);
+         //System.out.println(workspaceID);
+         //System.out.println(jsonString);
+         DB db = m.getDB( Tokens.WORKSPACE_DATABASE );
+         DBCollection coll = db.getCollection(workspaceID);
+         BasicDBObject bo = (BasicDBObject) JSON.parse(jsonString);
+         WriteResult save = coll.save(bo);
+        //System.out.println(workspaceID);
+         return bo.toString() + "\n";
+     }
+     
+          /**
+      * save a document to the workspace provided
+      * @param workspaceID
+      * @return 
+      */     
+     @POST
+     @Path("/document/{workspaceid}")
+     //@Consumes("application/json")
+     @Produces("application/json")
+     public String saveJSONDocument(@PathParam("workspaceid") String workspaceID, String jsonString) { //, String jsonString
          //System.out.println(jsonString);
          //System.out.println(workspaceID);
          //System.out.println(jsonString);

@@ -45,7 +45,7 @@ public class NonBlockingDownloadHandler extends HttpHandler {
         public void service(final Request request,
                             final Response response) throws Exception {
             
-            System.out.println("Entering NonBlockingDownloadHandler...");
+            //System.out.println("Entering NonBlockingDownloadHandler...");
             
             // Disable internal Response buffering
             response.setBufferSize(0);
@@ -59,8 +59,8 @@ public class NonBlockingDownloadHandler extends HttpHandler {
             
             final File file = new File(parentFolder, path);
             
-            System.out.println("path: " + path);
-            System.out.println("parentFolder: " + parentFolder);
+            //System.out.println("path: " + path);
+            //System.out.println("parentFolder: " + parentFolder);
             
             
             // check if file exists
@@ -87,7 +87,7 @@ public class NonBlockingDownloadHandler extends HttpHandler {
                 @Override
                 public void onWritePossible() throws Exception {
                     LOGGER.log(Level.FINE, "[onWritePossible]");
-                    System.out.println("onWritePossible");
+                    //System.out.println("onWritePossible");
                     // send CHUNK of data
                     final boolean isWriteMore = sendChunk();
 
@@ -99,7 +99,7 @@ public class NonBlockingDownloadHandler extends HttpHandler {
 
                 @Override
                 public void onError(Throwable t) {
-                    System.out.println("onError");
+                    //System.out.println("onError");
                     LOGGER.log(Level.WARNING, "[onError] ", t);
                     response.setStatus(500, t.getMessage());
                     complete(true);
@@ -110,7 +110,7 @@ public class NonBlockingDownloadHandler extends HttpHandler {
                  */
                 private boolean sendChunk() throws IOException {
                     // allocate Buffer
-                    System.out.println("Send Chunk...");
+                    //System.out.println("Send Chunk...");
                     final MemoryManager mm = request.getContext().getMemoryManager();
                     final Buffer buffer = mm.allocate(CHUNK_SIZE);
                     // mark it available for disposal after content is written
@@ -144,31 +144,31 @@ public class NonBlockingDownloadHandler extends HttpHandler {
                  * Complete the download
                  */
                 private void complete(final boolean isError) {
-                    System.out.println("complete, isError: " + isError);
+                    //System.out.println("complete, isError: " + isError);
                     try {
-                        System.out.println("fileChannel.close()");
+                        //System.out.println("fileChannel.close()");
                         fileChannel.close();
                     } catch (IOException e) {
                         if (!isError) {
-                            System.out.println("!isError");
+                            //System.out.println("!isError");
                             response.setStatus(500, e.getMessage());
                         }
                     }
                     
                     try {
-                        System.out.println("output.close()");
+                        //System.out.println("output.close()");
                         output.close();
                     } catch (Exception e) {
                         if (!isError) {
                             response.setStatus(500, e.getMessage());
                         }
                     }
-                    System.out.println("response.isSuspended()");
+                    //System.out.println("response.isSuspended()");
                     if (response.isSuspended()) {
-                        System.out.println("response.resume()");
+                        //System.out.println("response.resume()");
                         response.resume();
                     } else {
-                        System.out.println("response.finish()");
+                        //System.out.println("response.finish()");
                         response.finish();                    
                     }                    
                 }
