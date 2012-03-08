@@ -82,7 +82,7 @@ public class WebServer {
             // Map the NonBlockingUploadHandler to "/" URL
             //config.addHttpHandler(new NonBlockingDownloadHandler(new File(".") ), "/download");
             
-            config.addHttpHandler(new NonBlockingDownloadHandler(new File(".")), "/");
+            config.addHttpHandler(new NonBlockingDownloadHandler(new File(sysprop.get("scratch_path"))), "/");
             server.start();
             return server;
         } catch (IOException ex) {
@@ -103,7 +103,7 @@ public class WebServer {
             final ServerConfiguration config = server.getServerConfiguration();
 
             // Map the path, /upload, to the NonBlockingUploadHandler
-            config.addHttpHandler(new NonBlockingUploadHandler(), "/ps/upload");
+            config.addHttpHandler(new NonBlockingUploadHandler(sysprop.get("scratch_path")), "/ps/upload");
 
             try {
                 server.start();

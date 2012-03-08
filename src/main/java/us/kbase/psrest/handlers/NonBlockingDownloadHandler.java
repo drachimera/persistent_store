@@ -4,6 +4,10 @@
  */
 package us.kbase.psrest.handlers;
 
+import com.mongodb.DB;
+import com.mongodb.Mongo;
+import com.mongodb.gridfs.GridFS;
+import com.mongodb.gridfs.GridFSDBFile;
 import java.io.File;
 import java.io.FileInputStream;
 import org.glassfish.grizzly.http.server.io.NIOOutputStream;
@@ -11,6 +15,7 @@ import org.glassfish.grizzly.http.server.io.WriteHandler;
 import org.glassfish.grizzly.http.server.util.MimeType;
 import org.glassfish.grizzly.memory.MemoryManager;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.channels.FileChannel;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -20,6 +25,8 @@ import org.glassfish.grizzly.http.server.HttpHandler;
 import org.glassfish.grizzly.http.server.Request;
 import org.glassfish.grizzly.http.server.Response;
 import org.glassfish.grizzly.http.util.HttpStatus;
+import us.kbase.psrest.util.MongoConnection;
+import us.kbase.psrest.util.SystemProperties;
 import us.kbase.psrest.util.Tokens;
 
 /**
@@ -31,6 +38,8 @@ import us.kbase.psrest.util.Tokens;
 public class NonBlockingDownloadHandler extends HttpHandler {
         private static final Logger LOGGER = Grizzly.logger(NonBlockingDownloadHandler.class);
         private static final int CHUNK_SIZE = Tokens.CHUNK_SIZE;
+        private static final Mongo m = MongoConnection.getMongo();
+        private static final DB db = m.getDB( Tokens.WORKSPACE_DATABASE );
         
         private final File parentFolder;
 
@@ -40,10 +49,24 @@ public class NonBlockingDownloadHandler extends HttpHandler {
         
         // -------------------------------------------- Methods from HttpHandler
 
+        public InputStream getFileFromMongo(String filename, String workspaceID){
+        try {
+            System.out.println("gridFSdownload");
+            System.out.println("filename: " + filename);
+            GridFS myFS = new GridFS(db, workspaceID);             // returns a GridFS where  "contracts" is root
+            GridFSDBFile findOne = myFS.findOne("upload1");                
+            findOne.writeTo("/tmp/"+filename+"z");
+            return findOne.getInputStream();
+        } catch (IOException ex) {
+            Logger.getLogger(NonBlockingDownloadHandler.class.getName()).log(Level.SEVERE, null, ex);
+        }
+            return null;
+        }
 
         @Override
         public void service(final Request request,
                             final Response response) throws Exception {
+            final SystemProperties sysprop = new SystemProperties();
             
             //System.out.println("Entering NonBlockingDownloadHandler...");
             
@@ -55,12 +78,17 @@ public class NonBlockingDownloadHandler extends HttpHandler {
             final NIOOutputStream output = response.getOutputStream(false);//.getNIOOutputStream();
             
             // get file path
-            final String path = request.getDecodedRequestURI();
+            final String url = request.getDecodedRequestURI();
+            final String path = sysprop.get("scratch_path");
+            final String workspaceID = url.replaceAll("/ps/download", "");
             
+            System.out.println("path: " + path);
+            System.out.println("parentFolder: " + parentFolder);
+            System.out.println("workspace: " + workspaceID);
+            
+            //getFileFromMongo("upload1", workspaceID);
+            getFileFromMongo("upload1", "w919196189ed3f63b5d98ac537c29bc1c75255a47");
             final File file = new File(parentFolder, path);
-            
-            //System.out.println("path: " + path);
-            //System.out.println("parentFolder: " + parentFolder);
             
             
             // check if file exists

@@ -42,8 +42,8 @@ public class FixStringsTest {
 //    @Test
 //    public void testUsr2mongo() {
 //        System.out.println("usr2mongo");
-//        String s = "";
-//        String expResult = "";
+//        String s = ".";
+//        String expResult = "<dot>";
 //        String result = FixStrings.usr2mongo(s);
 //        assertEquals(expResult, result);
 //    }
@@ -54,8 +54,8 @@ public class FixStringsTest {
 //    @Test
 //    public void testMongo2usr() {
 //        System.out.println("mongo2usr");
-//        String s = "";
-//        String expResult = "";
+//        String s = "<dot>";
+//        String expResult = ".";
 //        String result = FixStrings.mongo2usr(s);
 //        assertEquals(expResult, result);
 //

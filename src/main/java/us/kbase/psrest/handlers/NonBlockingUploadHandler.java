@@ -41,6 +41,11 @@ import us.kbase.psrest.util.Tokens;
      */
     public class NonBlockingUploadHandler extends HttpHandler {
         
+        private static String fileroot = ".";
+        public NonBlockingUploadHandler(String stagingPath){
+            fileroot = stagingPath;
+        }
+        
         private final AtomicInteger counter = new AtomicInteger();
 
         // -------------------------------------------- Methods from HttpHandler
@@ -53,11 +58,15 @@ import us.kbase.psrest.util.Tokens;
             // get file path
             final String path = request.getDecodedRequestURI();
             System.out.println(path);
+            
+            final String workspaceID = path.replaceAll("/ps/upload/", "");
+            System.out.println("workspace: " + workspaceID);
 
             final NIOInputStream in = request.getInputStream(false);//.getNIOInputStream(); // put the stream in non-blocking mode
             
-            final String filename = "./upload" + counter.incrementAndGet();
-            final FileChannel fileChannel = new FileOutputStream(filename).getChannel();
+            final String filename = "upload" + counter.incrementAndGet();
+            //final FileChannel fileChannel = new FileOutputStream(fileroot + "/" + workspaceID + "/" + filename).getChannel();
+            final FileChannel fileChannel = new FileOutputStream(fileroot + "/" + filename).getChannel();
             
             response.suspend();  // !!! suspend the Request
 
@@ -96,7 +105,7 @@ import us.kbase.psrest.util.Tokens;
                 private void complete(final boolean isError) {
                     try {
                         fileChannel.close();
-                        GridFSWright(filename);
+                        GridFSWright(filename, workspaceID);
                     } catch (IOException e) {
                         if (!isError) {
                             response.setStatus(500, e.getMessage());
@@ -117,11 +126,12 @@ import us.kbase.psrest.util.Tokens;
         
         private static final Mongo m = MongoConnection.getMongo();
         private static final DB db = m.getDB( Tokens.WORKSPACE_DATABASE );       
-        private static void GridFSWright(String filename){
+        private static void GridFSWright(String filename, String workspaceID){
             try {
-                InputStream instream = new FileInputStream(new File(filename));
+                System.out.println("GridFS Saving: " + filename);
+                InputStream instream = new FileInputStream(new File(fileroot + "/" + filename));
         //        System.out.println(instream.available());
-                GridFS myFS = new GridFS(db, "foobar");              // returns a default GridFS (e.g. "fs" root collection)
+                GridFS myFS = new GridFS(db, workspaceID);              // returns a default GridFS (e.g. "fs" root collection)
                 GridFSInputFile createFile = myFS.createFile(instream, filename); 
                 //createFile.setFilename(filename);
                 createFile.save();

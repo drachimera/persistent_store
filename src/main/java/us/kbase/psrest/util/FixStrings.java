@@ -22,22 +22,22 @@ public class FixStrings {
     public static String usr2mongo(String s){
         String r = s.replaceAll("\\.", dot);
         r =  r.replaceAll("\\$", dollar);
-        r = r.replaceAll("~", tilda);
-        r = r.replaceAll("\\", backslash);       
-        r = r.replaceAll("'", singlequote);
-        r = r.replaceAll("\"", doublequote);
-        if(r.startsWith(doublequote)) r = r.replaceFirst(doublequote, "\"");
-        if(r.matches(doublequote + "$")) r = r.replaceAll(doublequote + "$", "\"");
+//        r = r.replaceAll("~", tilda);
+//        r = r.replaceAll("\\", backslash);       
+//        r = r.replaceAll("'", singlequote);
+//        r = r.replaceAll("\"", doublequote);
+//        if(r.startsWith(doublequote)) r = r.replaceFirst(doublequote, "\"");
+//        if(r.matches(doublequote + "$")) r = r.replaceAll(doublequote + "$", "\"");
         return r;
     }
     
     public static String mongo2usr(String s){
         String r = s.replaceAll(dot, "\\.");
         r = r.replaceAll(dollar, "\\$");
-        r = r.replaceAll(tilda, "~");
-        r = r.replaceAll(backslash, "\\");
-        r = r.replaceAll(singlequote, "'");
-        r = r.replaceAll(doublequote, "\"");
+//        r = r.replaceAll(tilda, "~");
+//        r = r.replaceAll(backslash, "\\");
+//        r = r.replaceAll(singlequote, "'");
+//        r = r.replaceAll(doublequote, "\"");
         return r;
     }
     

@@ -31,6 +31,7 @@ import javax.ws.rs.PathParam;
 import org.bson.types.ObjectId;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
+import us.kbase.psrest.util.FixStrings;
 import us.kbase.psrest.util.MongoConnection;
 import us.kbase.psrest.util.SystemProperties;
 import us.kbase.psrest.util.Tokens;
@@ -75,15 +76,17 @@ public class Workspace {
          //System.out.println(jsonString);
          //System.out.println(workspaceID);
          //System.out.println(jsonString);
+         jsonString = FixStrings.usr2mongo(jsonString);
+         System.out.println(jsonString);
          DB db = m.getDB( Tokens.WORKSPACE_DATABASE );
          DBCollection coll = db.getCollection(workspaceID);
          BasicDBObject bo = (BasicDBObject) JSON.parse(jsonString);
          WriteResult save = coll.save(bo);
         //System.out.println(workspaceID);
-         return bo.toString() + "\n";
+         return FixStrings.mongo2usr(bo.toString()) + "\n";
      }
      
-          /**
+     /**
       * save a document to the workspace provided
       * @param workspaceID
       * @return 
@@ -96,12 +99,13 @@ public class Workspace {
          //System.out.println(jsonString);
          //System.out.println(workspaceID);
          //System.out.println(jsonString);
+         jsonString = FixStrings.usr2mongo(jsonString);
          DB db = m.getDB( Tokens.WORKSPACE_DATABASE );
          DBCollection coll = db.getCollection(workspaceID);
          BasicDBObject bo = (BasicDBObject) JSON.parse(jsonString);
          WriteResult save = coll.save(bo);
         //System.out.println(workspaceID);
-         return bo.toString() + "\n";
+         return FixStrings.mongo2usr(bo.toString()) + "\n";
      }
      
      @DELETE
@@ -154,7 +158,7 @@ public class Workspace {
          int counter = 0;
          DB db = m.getDB( Tokens.WORKSPACE_DATABASE );
          DBCollection coll = db.getCollection(workspaceID);
-         BasicDBObject bo = (BasicDBObject) JSON.parse(jsonString);
+         BasicDBObject bo = (BasicDBObject) JSON.parse(FixStrings.usr2mongo(jsonString));
          DBCursor find = coll.find(bo);
          Iterator<DBObject> iter = find.iterator();
          while(iter.hasNext()){
@@ -166,7 +170,7 @@ public class Workspace {
              //remove the redundant id
              next.removeField("_id"); 
              //ret+= "\"kbid" + counter + "\" : "; 
-             String rec = next.toString().replaceAll("<dot>", ".");
+             String rec = FixStrings.mongo2usr(next.toString());
              ret.append(rec);
          }
          ret.append("\n}\n");
