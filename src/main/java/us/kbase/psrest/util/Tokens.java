@@ -4,6 +4,8 @@
  */
 package us.kbase.psrest.util;
 
+import us.kbase.psrest.GridFS.PSGridFS;
+
 /**
  *
  * @author Daniel J. Quest
@@ -16,6 +18,6 @@ public class Tokens {
     public static final String USER_DATABASE = "user";    
     public static final String USER_COLLECTION = "users";    
     public static final String METADATA_COLLECTION = "meta";
-    public static final int CHUNK_SIZE = 8192;
+    public static final int CHUNK_SIZE = PSGridFS.DEFAULT_CHUNKSIZE;
     
 }

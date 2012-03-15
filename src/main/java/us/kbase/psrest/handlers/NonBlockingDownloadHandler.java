@@ -4,6 +4,7 @@
  */
 package us.kbase.psrest.handlers;
 
+import com.mongodb.BasicDBObject;
 import com.mongodb.DB;
 import com.mongodb.Mongo;
 import com.mongodb.gridfs.GridFS;
@@ -16,7 +17,9 @@ import org.glassfish.grizzly.http.server.util.MimeType;
 import org.glassfish.grizzly.memory.MemoryManager;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.channels.Channels;
 import java.nio.channels.FileChannel;
+import java.nio.channels.ReadableByteChannel;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.glassfish.grizzly.Buffer;
@@ -25,6 +28,8 @@ import org.glassfish.grizzly.http.server.HttpHandler;
 import org.glassfish.grizzly.http.server.Request;
 import org.glassfish.grizzly.http.server.Response;
 import org.glassfish.grizzly.http.util.HttpStatus;
+import us.kbase.psrest.GridFS.PSGridFS;
+import us.kbase.psrest.GridFS.PSGridFSDBFile;
 import us.kbase.psrest.util.MongoConnection;
 import us.kbase.psrest.util.SystemProperties;
 import us.kbase.psrest.util.Tokens;
@@ -48,20 +53,23 @@ public class NonBlockingDownloadHandler extends HttpHandler {
         }
         
         // -------------------------------------------- Methods from HttpHandler
-
-        public InputStream getFileFromMongo(String filename, String workspaceID){
-        try {
+        public PSGridFSDBFile getFileFromMongo(String filename, String workspaceID){
+//        try {
             System.out.println("gridFSdownload");
             System.out.println("filename: " + filename);
-            GridFS myFS = new GridFS(db, workspaceID);             // returns a GridFS where  "contracts" is root
-            GridFSDBFile findOne = myFS.findOne("upload1");                
-            findOne.writeTo("/tmp/"+filename+"z");
-            return findOne.getInputStream();
-        } catch (IOException ex) {
-            Logger.getLogger(NonBlockingDownloadHandler.class.getName()).log(Level.SEVERE, null, ex);
+            PSGridFS myFS = new PSGridFS(db, workspaceID);             // returns a GridFS where  "contracts" is root
+            PSGridFSDBFile findOne = myFS.findOne(filename);
+            System.out.println("file length: " + findOne.getLength());
+//            findOne.writeTo("/tmp/"+filename+"z");
+            return findOne;
+//        } catch (IOException ex) {
+//            Logger.getLogger(NonBlockingDownloadHandler.class.getName()).log(Level.SEVERE, null, ex);
+//        }
+//            return null;
         }
-            return null;
-        }
+
+       
+        
 
         @Override
         public void service(final Request request,
@@ -75,30 +83,42 @@ public class NonBlockingDownloadHandler extends HttpHandler {
             
             // put the stream in non-blocking mode
             
-            final NIOOutputStream output = response.getOutputStream(false);//.getNIOOutputStream();
+            final NIOOutputStream output = response.getOutputStream(true);//false is suposed to be faster but creates strange errors!   //.getNIOOutputStream();
             
             // get file path
             final String url = request.getDecodedRequestURI();
             final String path = sysprop.get("scratch_path");
-            final String workspaceID = url.replaceAll("/ps/download", "");
+            String tmp = url.replaceAll("/ps/download/", "");
+            final String workspaceID = tmp.replaceAll("/f/.*", "");//"w919196189ed3f63b5d98ac537c29bc1c75255a47";
+            final String filename = tmp.replaceAll(".+/f/", "");//"upload1";
             
             System.out.println("path: " + path);
             System.out.println("parentFolder: " + parentFolder);
             System.out.println("workspace: " + workspaceID);
-            
             //getFileFromMongo("upload1", workspaceID);
-            getFileFromMongo("upload1", "w919196189ed3f63b5d98ac537c29bc1c75255a47");
-            final File file = new File(parentFolder, path);
+            //final GridFSDBFile gridFSfile = getFileFromMongo(filename, workspaceID);
+            final PSGridFSDBFile gridFSfile = getFileFromMongo(filename, workspaceID);
+            InputStream mongostream = null;
+            //final File file = new File(parentFolder, path); -- use this to get a local file
             
             
             // check if file exists
-            if (!file.isFile()) {
+//            if (!file.isFile()) {
+//                response.setStatus(HttpStatus.NOT_FOUND_404);
+//                return;
+//            }
+            if (gridFSfile == null) {
+                //System.out.println("ISSUE HTTPSTATUS.NOT_FOUND_404!");
                 response.setStatus(HttpStatus.NOT_FOUND_404);
                 return;
+            }else {
+               mongostream  = gridFSfile.getInputStream();
             }
             
-            final FileChannel fileChannel =
-                    new FileInputStream(file).getChannel();
+            //use this if you want to get a local file
+            //final FileChannel fileChannel =
+            //        new FileInputStream(file).getChannel();
+            final ReadableByteChannel in = Channels.newChannel(mongostream);
             
             // set content-type
             final String contentType = MimeType.getByFilename(path);
@@ -110,7 +130,10 @@ public class NonBlockingDownloadHandler extends HttpHandler {
             output.notifyCanWrite(new WriteHandler() {
                 
                 // keep the remaining size
-                private volatile long size = file.length();
+                //private volatile long size = file.length();
+                private volatile long size = gridFSfile.getLength();
+                private volatile long chunksent = 0;
+                private final long totalchunks = gridFSfile.numChunks();
                 
                 @Override
                 public void onWritePossible() throws Exception {
@@ -121,7 +144,7 @@ public class NonBlockingDownloadHandler extends HttpHandler {
 
                     if (isWriteMore) {
                         // if there are more bytes to be sent - reregister this WriteHandler
-                        output.notifyCanWrite(this, CHUNK_SIZE);
+                        output.notifyCanWrite(this, Tokens.CHUNK_SIZE);
                     }
                 }
 
@@ -133,19 +156,61 @@ public class NonBlockingDownloadHandler extends HttpHandler {
                     complete(true);
                 }
 
+                
                 /**
-                 * Send next CHUNK_SIZE of file
+                 * Send next CHUNK_SIZE of file - this version does not work on large files!
                  */
                 private boolean sendChunk() throws IOException {
-                    // allocate Buffer
                     //System.out.println("Send Chunk...");
+                    final MemoryManager mm = request.getContext().getMemoryManager();
+                    final Buffer buffer = mm.allocate(Tokens.CHUNK_SIZE);
+                    // mark it available for disposal after content is written
+                    //buffer.allowBufferDispose(true);
+                    final byte[] justReadBytes = gridFSfile.getChunk( (int) chunksent);
+                    //System.out.println("chunks sent: " + chunksent);
+                    //for(int j = 0; j<400; j++){
+                    //    System.out.print((char) justReadBytes[j]);
+                    //}
+                    //System.out.println("\n");
+                    //prepare buffer for reading
+                    //buffer.position(justReadBytes.length);
+                    //buffer.trim();
+//                    if (justReadBytes.length <= 0) {
+//                        complete(false);
+//                        return false;
+//                    }
+                    // write the Buffer
+                    //buffer.put(justReadBytes);
+                    //output.write(buffer);
+                    output.write(justReadBytes);
+                    chunksent++;
+
+                    
+                    // check the remaining size here to avoid extra onWritePossible() invocation
+                    if (totalchunks <= chunksent) {
+                        complete(false);
+                        return false;
+                    }
+                    
+                    return true;
+                }
+                
+                /**
+                 * Send next CHUNK_SIZE of file - this version does not work on large files!
+                 * 
+                 * This one is not used!
+                 */
+                private boolean sendChunkSmall() throws IOException {
+                    // allocate Buffer
+                    //System.out.println("Send Chunk Small...");
                     final MemoryManager mm = request.getContext().getMemoryManager();
                     final Buffer buffer = mm.allocate(CHUNK_SIZE);
                     // mark it available for disposal after content is written
                     buffer.allowBufferDispose(true);
                                         
                     // read file to the Buffer
-                    final int justReadBytes = fileChannel.read(buffer.toByteBuffer());
+                    //final int justReadBytes = fileChannel.read(buffer.toByteBuffer());
+                    final int justReadBytes = in.read(buffer.toByteBuffer());
                     if (justReadBytes <= 0) {
                         complete(false);
                         return false;
@@ -175,7 +240,8 @@ public class NonBlockingDownloadHandler extends HttpHandler {
                     //System.out.println("complete, isError: " + isError);
                     try {
                         //System.out.println("fileChannel.close()");
-                        fileChannel.close();
+                        //fileChannel.close();
+                        in.close();
                     } catch (IOException e) {
                         if (!isError) {
                             //System.out.println("!isError");
@@ -200,6 +266,6 @@ public class NonBlockingDownloadHandler extends HttpHandler {
                         response.finish();                    
                     }                    
                 }
-            }, CHUNK_SIZE);
+            }, Tokens.CHUNK_SIZE);
         }
     } // END NonBlockingDownloadHandler    

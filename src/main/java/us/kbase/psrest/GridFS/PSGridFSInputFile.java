@@ -37,7 +37,7 @@ public class PSGridFSInputFile extends PSGridFSFile {
     
 
 
-    /**
+/**
 * Default constructor setting the GridFS file name and providing an input
 * stream containing data to be written to the file.
 *

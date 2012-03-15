@@ -68,7 +68,7 @@ public class PSGridFSDBFile extends PSGridFSFile {
         return _length;
     }
     
-    byte[] getChunk( int i ){
+    public byte[] getChunk( int i ){
         if ( _fs == null )
             throw new RuntimeException( "no gridfs!" );
         
