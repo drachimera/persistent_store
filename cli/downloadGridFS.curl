@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+echo downloading: $1
+curl -X GET http://$PS_HOST:$PS_DOWNLOAD_PORT/ps/download/$PS_WORKSPACE/f/$1

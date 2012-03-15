@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+#echo files:  
+curl -X GET  http://$PS_HOST:$PSREST_PORT/ps/file/$PS_WORKSPACE
