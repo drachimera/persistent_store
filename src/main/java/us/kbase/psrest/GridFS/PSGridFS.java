@@ -221,6 +221,10 @@ public class PSGridFS {
     // --------------------------
     // ------ writing -------
     // --------------------------
+    
+    public PSGridNIO createNIOFile(){
+        return new PSGridNIO(this);
+    }
 
     /**
 * creates a file entry.

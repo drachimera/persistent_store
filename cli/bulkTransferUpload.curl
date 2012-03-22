@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+echo input: $1  
+curl -X POST -d $1  http://$PS_HOST:$PSREST_PORT/ps/transfer/upload/$PS_WORKSPACE

@@ -104,6 +104,9 @@ public class Workspace {
          DBCollection coll = db.getCollection(workspaceID);
          BasicDBObject bo = (BasicDBObject) JSON.parse(jsonString);
          WriteResult save = coll.save(bo);
+         BasicDBObject ret = new BasicDBObject();
+         ret.append("status", "saved document to workspace= " + workspaceID);
+         ret.append("_id", "\"" + bo.get("_id").toString() + "\""); 
         //System.out.println(workspaceID);
          return FixStrings.mongo2usr(bo.toString()) + "\n";
      }
@@ -140,26 +143,43 @@ public class Workspace {
         return coll.findOne(searchById);
      }
      
+     @GET
+     @Path("/document/find/{workspaceid}")
+     @Consumes("application/json")
+     @Produces("application/json")
+     public String findDocumentONGet(@PathParam("workspaceid") String workspaceID){
+         return findDocument(workspaceID, "");
+     }
+     
      /**
       * save a document to the workspace provided
       * @param workspaceID
       * @return 
       */     
-     @GET
+     @POST
      @Path("/document/find/{workspaceid}")
      @Consumes("application/json")
      @Produces("application/json")
      public String findDocument(@PathParam("workspaceid") String workspaceID, String jsonString) { //, String jsonString
+         if(jsonString.contains("$")){          
+             return parseJSONFind(workspaceID, jsonString);
+         }
+         else {
+            return parseJSONFind(workspaceID, jsonString);
+         }
+     }
+     
+     public String parseJSONFind(String workspaceID, String jsonString){
          StringBuffer ret = new StringBuffer();
          ret.append("{\n");
-         //System.out.println(jsonString);
-         //System.out.println(workspaceID);
-         //System.out.println(jsonString);
+         System.out.println(workspaceID);
+         System.out.println(jsonString);
          int counter = 0;
          DB db = m.getDB( Tokens.WORKSPACE_DATABASE );
          DBCollection coll = db.getCollection(workspaceID);
-         BasicDBObject bo = (BasicDBObject) JSON.parse(FixStrings.usr2mongo(jsonString));
-         DBCursor find = coll.find(bo);
+         BasicDBObject query = (BasicDBObject) JSON.parse(jsonString); //FixStrings.usr2mongo(jsonString)
+         System.out.println("query: " + query.toString());
+         DBCursor find = coll.find(query);
          Iterator<DBObject> iter = find.iterator();
          while(iter.hasNext()){
              counter++;
@@ -176,6 +196,7 @@ public class Workspace {
          ret.append("\n}\n");
         //System.out.println(workspaceID);
          return ret.toString();
+         
      }
      
      @GET

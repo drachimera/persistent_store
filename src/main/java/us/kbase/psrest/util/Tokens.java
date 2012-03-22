@@ -19,5 +19,6 @@ public class Tokens {
     public static final String USER_COLLECTION = "users";    
     public static final String METADATA_COLLECTION = "meta";
     public static final int CHUNK_SIZE = PSGridFS.DEFAULT_CHUNKSIZE;
+    public static final String OWNER = "owner";
     
 }

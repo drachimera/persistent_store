@@ -66,7 +66,7 @@ public class Provision {
             // Return some cliched textual content
             DB db = m.getDB( Tokens.WORKSPACE_DATABASE );
             DBCollection coll = db.getCollection(Tokens.METADATA_COLLECTION);     
-            dbo.put("owner", ownerID);         
+            dbo.put(Tokens.OWNER, ownerID);         
             WriteResult wr = coll.save(dbo);
             ObjectId id = dbo.getObjectId("_id");
             //System.out.println("ID: " + id.toString());
