@@ -1,1 +1,2 @@
-curl -X GET  http://$PS_HOST:$PSREST_PORT/ps/document/find/$PS_WORKSPACE
+curl -H 'content-type:application/json' -d {} -X POST  http://$PS_HOST:$PSREST_PORT/ps/document/find/$PS_WORKSPACE
+#curl -X GET  http://$PS_HOST:$PSREST_PORT/ps/document/find/$PS_WORKSPACE
