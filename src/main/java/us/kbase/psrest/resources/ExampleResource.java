@@ -28,7 +28,7 @@ public class ExampleResource {
     @Produces("application/json")
     public String getClichedMessage() {
         // Return some cliched textual content        
-        return "PSREST Server Up and Functioning\n";
+        return "{\n status : \"PSREST Server Up and Functioning\"\n}\n";
     }
     
 }
